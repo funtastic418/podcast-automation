@@ -8,3 +8,5 @@ public/audio/
 *.db
 *.db-journal
 .claude/settings.local.json
+
+.vercel

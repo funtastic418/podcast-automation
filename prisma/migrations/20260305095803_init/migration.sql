@@ -1,17 +1,15 @@
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "email" TEXT,
     "name" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "Settings" (
-    "id" TEXT NOT NULL,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL,
     "aiProvider" TEXT NOT NULL DEFAULT 'openai',
     "openaiApiKey" TEXT,
@@ -20,8 +18,8 @@ CREATE TABLE "Settings" (
     "elevenlabsApiKey" TEXT,
     "elevenlabsVoiceId" TEXT,
     "elevenlabsModelId" TEXT NOT NULL DEFAULT 'eleven_multilingual_v2',
-    "elevenlabsStability" DOUBLE PRECISION NOT NULL DEFAULT 0.5,
-    "elevenlabsSimilarity" DOUBLE PRECISION NOT NULL DEFAULT 0.75,
+    "elevenlabsStability" REAL NOT NULL DEFAULT 0.5,
+    "elevenlabsSimilarity" REAL NOT NULL DEFAULT 0.75,
     "podcastName" TEXT,
     "podcastDescription" TEXT,
     "podcastAuthor" TEXT,
@@ -31,15 +29,14 @@ CREATE TABLE "Settings" (
     "podcastExplicit" BOOLEAN NOT NULL DEFAULT false,
     "defaultPromptTemplate" TEXT,
     "targetScriptLength" INTEGER NOT NULL DEFAULT 1500,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Settings_pkey" PRIMARY KEY ("id")
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Settings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "Episode" (
-    "id" TEXT NOT NULL,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL,
     "topic" TEXT NOT NULL,
     "title" TEXT,
@@ -53,25 +50,23 @@ CREATE TABLE "Episode" (
     "status" TEXT NOT NULL DEFAULT 'pending',
     "errorMessage" TEXT,
     "errorStep" TEXT,
-    "publishedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Episode_pkey" PRIMARY KEY ("id")
+    "publishedAt" DATETIME,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Episode_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "PipelineLog" (
-    "id" TEXT NOT NULL,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "episodeId" TEXT NOT NULL,
     "step" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "message" TEXT,
     "durationMs" INTEGER,
     "metadata" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "PipelineLog_pkey" PRIMARY KEY ("id")
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "PipelineLog_episodeId_fkey" FOREIGN KEY ("episodeId") REFERENCES "Episode" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateIndex
@@ -91,12 +86,3 @@ CREATE INDEX "Episode_status_idx" ON "Episode"("status");
 
 -- CreateIndex
 CREATE INDEX "PipelineLog_episodeId_idx" ON "PipelineLog"("episodeId");
-
--- AddForeignKey
-ALTER TABLE "Settings" ADD CONSTRAINT "Settings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Episode" ADD CONSTRAINT "Episode_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "PipelineLog" ADD CONSTRAINT "PipelineLog_episodeId_fkey" FOREIGN KEY ("episodeId") REFERENCES "Episode"("id") ON DELETE CASCADE ON UPDATE CASCADE;

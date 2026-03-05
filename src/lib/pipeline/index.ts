@@ -179,7 +179,7 @@ async function stepUploadAudio(episodeId: string) {
   const filename = `${episode.slug || episode.id}.mp3`;
   let audioUrl: string;
 
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (process.env.BLOB_READ_WRITE_TOKEN && process.env.BLOB_READ_WRITE_TOKEN !== "your_vercel_blob_token_here") {
     // Use Vercel Blob in production
     const { put } = await import("@vercel/blob");
     const blob = await put(filename, audioBuffer, {
