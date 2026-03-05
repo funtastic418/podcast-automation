@@ -5,7 +5,7 @@ import { getDefaultUser } from "@/lib/get-user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Mic, PlusCircle, Rss, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Mic, PlusCircle, CheckCircle, XCircle, Clock } from "lucide-react";
 import { STATUS_COLORS, STATUS_LABELS, type EpisodeStatus } from "@/types";
 import { FeedLinkCard } from "@/components/feed-link-card";
 
