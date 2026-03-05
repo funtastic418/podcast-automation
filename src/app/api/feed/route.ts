@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { getDefaultUser } from "@/lib/get-user";
-import { formatDuration } from "@/lib/slug";
+import { getEpisodes, getSettings } from "@/lib/simple-storage";
 
 function escapeXml(str: string): string {
   return str
@@ -14,17 +12,8 @@ function escapeXml(str: string): string {
 
 export async function GET(request: Request) {
   try {
-    const user = await getDefaultUser();
-    const settings = user.settings;
-
-    if (!settings) {
-      return new NextResponse("Podcast not configured", { status: 404 });
-    }
-
-    const episodes = await prisma.episode.findMany({
-      where: { userId: user.id, status: "published" },
-      orderBy: { publishedAt: "desc" },
-    });
+    const episodes = await getEpisodes();
+    const settings = await getSettings();
 
     const baseUrl = new URL(request.url).origin;
     const feedUrl = `${baseUrl}/api/feed`;
@@ -35,20 +24,14 @@ export async function GET(request: Request) {
 
     const items = episodes
       .map((ep) => {
-        const pubDate = ep.publishedAt
-          ? new Date(ep.publishedAt).toUTCString()
-          : new Date(ep.createdAt).toUTCString();
-        const duration = ep.duration ? formatDuration(ep.duration) : "00:00:00";
-
         return `    <item>
-      <title>${escapeXml(ep.title || ep.topic)}</title>
-      <description><![CDATA[${ep.summary || ep.topic}]]></description>
-      <pubDate>${pubDate}</pubDate>
-      <enclosure url="${escapeXml(ep.audioUrl || "")}" length="${ep.audioFileSize || 0}" type="audio/mpeg"/>
-      <itunes:duration>${duration}</itunes:duration>
-      <itunes:episode>${ep.episodeNumber || 1}</itunes:episode>
+      <title>${escapeXml(ep.title)}</title>
+      <description><![CDATA[${ep.description}]]></description>
+      <pubDate>${ep.pubDate}</pubDate>
+      <enclosure url="${escapeXml(ep.audioUrl)}" length="${ep.fileSize}" type="audio/mpeg"/>
+      <itunes:duration>${ep.duration}</itunes:duration>
       <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>${settings.podcastExplicit ? "yes" : "no"}</itunes:explicit>
+      <itunes:explicit>no</itunes:explicit>
       <guid isPermaLink="false">${ep.id}</guid>
     </item>`;
       })
@@ -68,7 +51,7 @@ export async function GET(request: Request) {
     <itunes:author>${escapeXml(podcastAuthor)}</itunes:author>
     <itunes:summary>${escapeXml(podcastDescription)}</itunes:summary>
     <itunes:category text="${escapeXml(settings.podcastCategory || "Technology")}"/>
-    <itunes:explicit>${settings.podcastExplicit ? "yes" : "no"}</itunes:explicit>
+    <itunes:explicit>no</itunes:explicit>
     <itunes:image href="${escapeXml(coverUrl)}"/>
     <image>
       <url>${escapeXml(coverUrl)}</url>
