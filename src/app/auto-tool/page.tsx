@@ -136,7 +136,7 @@ Apple Podcasts will update within 24 hours.`);
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p>1. Enter your episode topic and script</p>
-          <p>2. Click "Create Episode & Push to Apple Podcasts"</p>
+          <p>2. Click &quot;Create Episode &amp; Push to Apple Podcasts&quot;</p>
           <p>3. Episode is automatically added to your RSS feed</p>
           <p>4. Apple Podcasts detects new episode within 24 hours</p>
           <p>5. No manual work required</p>
